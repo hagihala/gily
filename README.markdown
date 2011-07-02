@@ -1,6 +1,6 @@
 # What is this ?
 
-This script is clone of (git-wiki)[https://github.com/sr/git-wiki] written by Python and Flask.
+This script is clone of [git-wiki](https://github.com/sr/git-wiki) written by Python and Flask.
 
 # Requirements
 
