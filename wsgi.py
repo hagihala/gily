@@ -36,7 +36,7 @@ class Wiki ( object ):
             pages = []
             for entry in repo.tree().traverse():
                 if entry.type == 'blob':
-                    pages.append( Page( blob, repo ) )
+                    pages.append( Page( entry, repo ) )
             
             return pages
 
@@ -60,7 +60,7 @@ class Wiki ( object ):
             try:
                 blob = tree/("%s.%s" % ( path, self.extension ))
             except KeyError, e:
-                raise
+                pass
 
             return blob
 
@@ -93,7 +93,10 @@ class Page ( object ):
         return os.path.splitext( self.blob.name )[0]
 
     def content ( self ):
-        return self.blob.data_string.read()
+        try:
+            return self.blob.data_stream.read()
+        except AttributeError, e:
+            return None
 
     def update_content ( self, new ):
         if self.content == new:
@@ -109,7 +112,11 @@ class Page ( object ):
         index = self.repository.index
         blob  = self.blob
 
-        index.add([ IndexEntry.from_blob( self.blob ) ])
+        if os.path.isfile( blob.abspath ):
+            index.add([ blob.path ])
+        else:
+            index.add([ IndexEntry.from_blob( blob ) ])
+
         return index.commit( message );
 
 from flask import Flask, render_template, redirect, url_for, request

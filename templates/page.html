@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page.name() }}{% endblock %}
+
+{% block contents %}
+<header>
+  <h1><a href="{{ url_for('view_page', page=page.name() ) }}">{{ page.name() }}</a></h1>
+  <p><a href="{{ url_for('edit_page', page=page.name() ) }}">Edit</a></p>
+</header>
+
+<article>
+  <pre>{{ page.content() }}</pre>
+</article>
+
+{% endblock %}

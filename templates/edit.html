@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page.name() }}{% endblock %}
+
+{% block contents %}
+<header>
+  <h1><a href="{{ url_for('view_page', page=page.name()) }}">{{ page.name() }}</a></h1>
+</header>
+
+<fieldset>
+  <legend>Edit Source:</legend>
+
+  <form method="POST" action="{{ url_for('update_page', page=page.name()) }}">
+    <textarea name="body">{{ page.content() }}</textarea>
+    <br >
+    <input type="submit" value="update!">
+  </form>
+</fieldset>
+
+{% endblock %}

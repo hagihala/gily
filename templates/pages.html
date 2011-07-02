@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Wiki Index{% endblock %}
+
+{% block contents %}
+<header>
+  <h1>Wiki Index:</h1>
+</header>
+
+<article>
+  <h1>Pages:</h1>
+  
+  <ul>
+  {% for page in pages | sort %}
+    <li><a href="{{ url_for('view_page', page=page.name()) }}">{{ page.name() }}</a></li>
+  {% endfor %}
+  </ul>
+</article>
+
+{% endblock %}
