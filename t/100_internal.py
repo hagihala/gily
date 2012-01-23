@@ -10,6 +10,7 @@ import tempfile
 import shutil
 
 from wsgi import *
+from gily.models import Page, Wiki
 
 def test_wiki ():
     repo = tempfile.mkdtemp()
