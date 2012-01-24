@@ -89,34 +89,37 @@ class Wiki(object):
 
 class Page(object):
     def __init__(self, blob, repository):
-        self.blob = blob
-        self.repository = repository
+        self._blob = blob
+        self._repository = repository
 
     def __str__(self):
         return self.blob.name
 
+    @property
     def name(self):
-        return os.path.splitext(self.blob.name)[0]
+        return os.path.splitext(self._blob.name)[0]
 
+    @property
     def content(self):
         try:
-            return self.blob.data_stream.read()
+            return self._blob.data_stream.read()
         except AttributeError, e:
             return None
 
-    def update_content(self, new):
+    @content.setter
+    def content(self, new):
         if self.content == new:
             return None
 
-        fh = open(self.blob.abspath, 'w')
+        fh = open(self._blob.abspath, 'w')
         fh.write(new)
         fh.close()
 
-        return self.commit('Updated: %s' % (self.blob.name))
+        return self.commit('Updated: %s' % (self._blob.name))
 
     def commit(self, message):
-        index = self.repository.index
-        blob = self.blob
+        index = self._repository.index
+        blob = self._blob
 
         if os.path.isfile(blob.abspath):
             index.add([blob.path])
