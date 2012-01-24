@@ -13,6 +13,7 @@ import shutil
 from wsgi import *
 from gily.models import Page, Wiki
 
+# FIXME: Most of tests do nothing for testing!
 
 def test_wiki():
     repo = tempfile.mkdtemp()
@@ -44,7 +45,7 @@ def test_wiki():
 
         ### update_content
         pageA = wiki.find('NewPage')
-        pageA.update_content('hello new world!')
+        pageA.content = 'hello new world!'
 
         pageB = wiki.find('NewPage')
         nstl.ok_(pageB.content, 'hello new world!')

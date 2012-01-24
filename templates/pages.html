@@ -12,7 +12,7 @@
   
   <ul>
   {% for page in pages | sort %}
-    <li><a href="{{ url_for('view_page', page=page.name()) }}">{{ page.name() }}</a></li>
+    <li><a href="{{ url_for('view_page', page=page.name) }}">{{ page.name }}</a></li>
   {% endfor %}
   </ul>
 </article>

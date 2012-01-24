@@ -53,7 +53,7 @@ def view_page(page):
 def update_page(page):
     data = wiki.find_or_create(page)
     body = request.form.get('body', '')
-    data.update_content(body)
+    data.content = body
 
     return redirect(url_for('view_page', page=page))
 
