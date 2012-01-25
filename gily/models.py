@@ -16,21 +16,22 @@ class PageNotFound(Exception):
 
 
 class Wiki(object):
-    def __init__(self, repository, extension, homepage):
+    """Wiki site with git backend"""
+    def __init__(self, repo_path, extension, homepage):
         self.homepage = homepage
         self.extension = extension
 
-        if os.path.isdir(os.path.join(repository, '.git')):
-            self.repository = Repo(repository, odbt=GitDB)
+        if os.path.isdir(os.path.join(repo_path, '.git')):
+            self._repository = Repo(repo_path, odbt=GitDB)
         else:
-            if not os.path.isdir(repository):
-                os.makedirs(repository)
+            if not os.path.isdir(repo_path):
+                os.makedirs(repo_path)
 
-            os.chdir(repository)
-            self.repository = Repo.init()
+            os.chdir(repo_path)
+            self._repository = Repo.init()
 
     def find_all(self):
-        repo = self.repository
+        repo = self._repository
 
         if len(repo.refs) == 0:
             return []
@@ -47,10 +48,10 @@ class Wiki(object):
         if blob is None:
             raise PageNotFound(name)
 
-        return Page(blob, self.repository)
+        return Page(blob, self._repository)
 
     def find_blob(self, path):
-        repo = self.repository
+        repo = self._repository
 
         if len(repo.refs) == 0:
             return None
@@ -71,13 +72,13 @@ class Wiki(object):
         except PageNotFound, e:
             page = Page(
                     self.create_blob_for(name, data=content),
-                    self.repository
+                    self._repository
                     )
             page.commit('Page (%s) is created.' % (name))
             return page
 
     def create_blob_for(self, path, data=''):
-        repo = self.repository
+        repo = self._repository
         istream = IStream('blob', len(data), StringIO(data))
 
         repo.odb.store(istream)
