@@ -5,8 +5,10 @@ Werkzeug==0.8.2
 async==0.6.1
 gitdb==0.5.4
 greenlet==0.3.3
+ipython==0.12
 meinheld==0.4.13
 nose==1.1.2
 pep8==0.6.1
+readline==6.2.1
 smmap==0.8.2
 wsgiref==0.1.2

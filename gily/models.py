@@ -89,9 +89,10 @@ class Wiki(object):
 
 
 class Page(object):
-    def __init__(self, blob, repository):
+    def __init__(self, blob, repository, commit=None):
         self._blob = blob
         self._repository = repository
+        self._commit = commit
 
     def __str__(self):
         return self.blob.name
@@ -128,3 +129,18 @@ class Page(object):
             index.add([IndexEntry.from_blob(blob)])
 
         return index.commit(message)
+
+    def get_histories(self):
+        blobs = []
+        for i, commit in enumerate(self._repository.iter_commits()):
+            blobs.extend([
+                    x for x in commit.tree.blobs if x.path == self._blob.path
+                    ])
+        return [Page(x, self._repository, commit) for x in blobs]
+
+    @property
+    def updated_at(self):
+        if self._commit is not None:
+            return self._commit.committed_date
+        else:
+            return None
