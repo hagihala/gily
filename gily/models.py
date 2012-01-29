@@ -2,6 +2,8 @@
 
 import os
 
+from datetime import datetime
+from dateutil.tz import tzoffset
 from git import *
 from gitdb import IStream
 from StringIO import StringIO
@@ -131,16 +133,21 @@ class Page(object):
         return index.commit(message)
 
     def get_histories(self):
-        blobs = []
+        pages = []
         for i, commit in enumerate(self._repository.iter_commits()):
-            blobs.extend([
-                    x for x in commit.tree.blobs if x.path == self._blob.path
+            pages.extend([
+                    Page(x, self._repository, commit) for x in
+                        commit.tree.blobs if x.path == self._blob.path
                     ])
-        return [Page(x, self._repository, commit) for x in blobs]
+        return pages
 
     @property
     def updated_at(self):
         if self._commit is not None:
-            return self._commit.committed_date
+            timestamp = self._commit.committed_date
+            offset = self._commit.committer_tz_offset
+            dt = datetime.fromtimestamp(timestamp, tzoffset(None, -offset))
+            return dt
+
         else:
             return None
