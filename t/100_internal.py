@@ -16,20 +16,20 @@ from gily.models import Page, Wiki
 # FIXME: Most of tests do nothing for testing!
 
 def test_wiki():
-    repo = tempfile.mkdtemp()
+    repo_dir = tempfile.mkdtemp()
 
     try:
         ### create new wiki
-        wiki = Wiki(repo, 'txt', 'FrontPage')
+        wiki = Wiki(repo_dir, 'txt', 'FrontPage')
         nstl.ok_(isinstance(wiki, Wiki))
-        nstl.ok_(wiki.repository.working_tree_dir, repo)
-        nstl.ok_(wiki.repository.git_dir, os.path.join(repo, '.git'))
+        nstl.ok_(wiki._repository.working_tree_dir, repo_dir)
+        nstl.ok_(wiki._repository.git_dir, os.path.join(repo_dir, '.git'))
 
         ### already exists wiki
-        wiki2 = Wiki(repo, 'txt', 'FrontPage')
+        wiki2 = Wiki(repo_dir, 'txt', 'FrontPage')
         nstl.ok_(isinstance(wiki2, Wiki))
-        nstl.ok_(wiki2.repository.working_tree_dir, repo)
-        nstl.ok_(wiki2.repository.git_dir, os.path.join(repo, '.git'))
+        nstl.ok_(wiki2._repository.working_tree_dir, repo_dir)
+        nstl.ok_(wiki2._repository.git_dir, os.path.join(repo_dir, '.git'))
 
         ### find_all (empty)
         nstl.ok_(wiki.find_all() == [])
@@ -51,4 +51,4 @@ def test_wiki():
         nstl.ok_(pageB.content, 'hello new world!')
 
     finally:
-        shutil.rmtree(repo)
+        shutil.rmtree(repo_dir)
