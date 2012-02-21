@@ -3,7 +3,7 @@
 
 from flask import Flask, render_template, redirect, url_for, request
 import config
-from gily.models import Wiki
+from gily.models import Wiki, PageNotFound
 
 app = Flask(__name__)
 app.config.from_object(config)

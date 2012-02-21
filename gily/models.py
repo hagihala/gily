@@ -7,6 +7,9 @@ from dateutil.tz import tzoffset
 from git import *
 from gitdb import IStream
 from StringIO import StringIO
+from pygit2 import (
+        Repository, Blob, init_repository
+        )
 
 
 class PageNotFound(Exception):
@@ -18,30 +21,38 @@ class PageNotFound(Exception):
 
 
 class Wiki(object):
-    """Wiki site with git backend"""
+    """Wiki site with git backend
+
+    The instance of this class creates/uses a non-bare Git repository
+    as backend.
+    """
     def __init__(self, repo_path, extension, homepage):
         self.homepage = homepage
         self.extension = extension
 
         if os.path.isdir(os.path.join(repo_path, '.git')):
-            self._repository = Repo(repo_path, odbt=GitDB)
+            self._repository = Repository(repo_path)
         else:
             if not os.path.isdir(repo_path):
                 os.makedirs(repo_path)
-
-            os.chdir(repo_path)
-            self._repository = Repo.init()
+            is_bare = False
+            self._repository = init_repository(repo_path, is_bare)
 
     def find_all(self):
+        """Nested tree travarsal might not be supported yet"""
         repo = self._repository
 
-        if len(repo.refs) == 0:
+        if len(repo.listall_references) == 0:
             return []
         else:
+            head = repo.lookup_reference('HEAD').resolve()
+            commit = repo[head.oid]
+            tree = commit.tree
             pages = []
-            for entry in repo.tree().traverse():
-                if entry.type == 'blob':
-                    pages.append(Page(entry, repo))
+            for entry in tree:
+                obj = entry.to_object()
+                if isinstance(obj, Blob):
+                    pages.append(Page(obj, repo))
             return pages
 
     def find(self, name):
@@ -55,14 +66,17 @@ class Wiki(object):
     def find_blob(self, path):
         repo = self._repository
 
-        if len(repo.refs) == 0:
+        if len(repo.listall_references()) == 0:
             return None
         else:
-            tree = repo.tree()
+            head = repo.lookup_reference('HEAD').resolve()
+            commit = repo[head.oid]
+            tree = commit.tree
             blob = None
 
             try:
-                blob = tree / ("%s.%s" % (path, self.extension))
+                path = "%s.%s" % (path, self.extension)
+                blob = tree[path].to_object()
             except KeyError, e:
                 pass
 
@@ -91,27 +105,35 @@ class Wiki(object):
 
 
 class Page(object):
-    def __init__(self, blob, repository, commit=None):
+    def __init__(self, blob, repository):
         self._blob = blob
         self._repository = repository
-        self._commit = commit
 
     def __str__(self):
-        return self.blob.name
+        # FIXME: support pygit2
+        return self.name
 
     @property
     def name(self):
-        return os.path.splitext(self._blob.name)[0]
+        """Assume that blob is in the HEAD.
+        And nested-tree travarsal might not be supported yet"""
+        repo = self._repository
+        head = repo.lookup_reference('HEAD').resolve()
+        commit = repo[head.oid]
+        tree = commit.tree
+        entry = [ x for x in tree if x.oid == self._blob.oid ][0]
+        return os.path.splitext(entry.name)[0]
 
     @property
     def content(self):
         try:
-            return self._blob.data_stream.read()
+            return self._blob.data
         except AttributeError, e:
             return None
 
     @content.setter
     def content(self, new):
+        # FIXME: support pygit2
         if self.content == new:
             return None
 
@@ -122,6 +144,7 @@ class Page(object):
         return self.commit('Updated: %s' % (self._blob.name))
 
     def commit(self, message):
+        # FIXME: support pygit2
         index = self._repository.index
         blob = self._blob
 
@@ -133,6 +156,7 @@ class Page(object):
         return index.commit(message)
 
     def get_histories(self):
+        # FIXME: support pygit2
         pages = []
         for i, commit in enumerate(self._repository.iter_commits()):
             pages.extend([
@@ -143,6 +167,7 @@ class Page(object):
 
     @property
     def updated_at(self):
+        # FIXME: support pygit2
         if self._commit is not None:
             timestamp = self._commit.committed_date
             offset = self._commit.committer_tz_offset
